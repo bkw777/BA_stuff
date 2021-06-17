@@ -133,7 +133,6 @@ for ((rn = 1 ; rn <= NR ; rn++)) ; do
     vprint 5 ">   new body  |${NEW_BODY}|"
 
     # advance the scan position to the end of the current statement
-    #SCAN_POS=$((SCAN_POS+STATEMENT_POS+${#OLD_STATEMENT}))
     SCAN_POS=$((SCAN_POS + STATEMENT_POS + STATEMENT_LEN))
 
   done
