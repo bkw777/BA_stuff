@@ -1,0 +1,148 @@
+#!/bin/bash
+# Renumber TRS-80 Model 100 BASIC code.
+# GPL3 b.kenyn.w@gmail.com
+#
+# Usage:
+# [DEBUG=#] [STEP=#] [START=#] ./renum.sh FILE.DO
+#
+#   DEBUG=#  0 (default) = runnable output, with CRLF
+#            1+ = increasingly verbose debugging output, no CRLF
+#
+#   STEP=#   new line numbers increment, default 10
+#
+#   START=#  new line numbers start, default 1*STEP
+#
+#   FILE.DO  ascii format TRS-80 Model 100 BASIC program
+#
+# Examples:
+# runnable output, default settings
+#    ./renum.sh FILE.DO > NEW.DO
+#
+# max verbose debug, start output line#'s at 5000, increment by 1
+#    DEBUG=5 START=5000 STEP=1 ./renum.sh  FILE.DO |less
+
+: ${DEBUG:=0}
+: ${STEP:=10}
+: ${START:=${STEP}}
+KEYWORDS_REGEX="(GOTO|GOSUB|RESUME|ELSE|THEN)"
+ARGUMENT_REGEX="[0-9,[:space:]]+"
+ifs="${IFS}"
+
+function vprint () {
+	local d=${1} ;shift
+	local s="${@}"
+	((DEBUG)) || s+=$'\r'
+	((DEBUG>=d)) && printf "%s\n" "${s}"
+}
+
+function eprint () {
+  ((DEBUG)) && printf "%s\n" "${@}" || printf "%s\n" "${@}" >&2
+}
+
+rn=0
+while IFS=$'\r\n' read -r t ; do
+	[[ "${t}" =~ ^[0-9]+ ]] || continue
+	OLD_LNUM[++rn]=${BASH_REMATCH[0]}
+	OLD_BODY[rn]="${t:${#OLD_LNUM[rn]}}"
+	NEW_LNUM[${OLD_LNUM[rn]}]=$((START+(rn-1)*STEP))
+done
+
+NR=${rn}
+HIGHEST_NEW_LNUM=NEW_LNUM[OLD_LNUM[NR]]
+
+# loop over every record in OLD_BODY[]
+for ((rn = 1 ; rn <= NR ; rn++)) ; do
+  vprint 1 "${OLD_LNUM[rn]}${OLD_BODY[rn]}"
+
+  NEW_BODY=""
+  STATEMENT_POS=0
+  SCAN_POS=1
+  OLD_BODY_LEN=${#OLD_BODY[rn]}
+  FLAG=""
+  CURRENT_NEW_LNUM=${NEW_LNUM[${OLD_LNUM[rn]}]}
+
+  # process a line
+  while ((SCAN_POS < OLD_BODY_LEN)) ; do
+
+    REMAINING_OLD_BODY=${OLD_BODY[rn]:$((SCAN_POS-1))}
+    vprint 3 "    position: ${SCAN_POS}"
+    vprint 3 "    remaining |${REMAINING_OLD_BODY}|"
+
+    # look for a keyword+argument statement
+    [[ "${REMAINING_OLD_BODY}" =~ ${KEYWORDS_REGEX}${ARGUMENT_REGEX} ]] || {
+
+      # did not find a statement
+      NEW_BODY+="${REMAINING_OLD_BODY}"
+      vprint 5 ">   new body  |${NEW_BODY}|"
+      SCAN_POS=${OLD_BODY_LEN}
+      continue
+    }
+
+    # found a statement
+
+    OLD_STATEMENT="${BASH_REMATCH[0]}"
+    pre="${REMAINING_OLD_BODY%%${OLD_STATEMENT}*}"
+    STATEMENT_POS=${#pre}
+
+    # append part before statement to new body
+    NEW_BODY+="${pre}"
+    vprint 5 ">   new body  |${NEW_BODY}|"
+
+    # isolate the statement
+    OLD_STATEMENT="${OLD_STATEMENT// /}"
+    vprint 2 "    old statement |${OLD_STATEMENT}|"
+
+    # split the statement into keyword & argument
+    [[ "${OLD_STATEMENT}" =~ ${ARGUMENT_REGEX} ]]
+    OLD_ARGUMENT="${BASH_REMATCH[0]}"
+    KEYWORD="${OLD_STATEMENT%%${OLD_ARGUMENT}}"
+    vprint 3 "        keyword |${KEYWORD}|"
+    vprint 3 "        old argument |${OLD_ARGUMENT}|"
+
+    # split the original argument on commas
+    IFS=, ;T=(${OLD_ARGUMENT}) ;IFS="${ifs}"
+    vprint 4 "        fields: ${#T[@]}"
+
+    # replace each old target with new target
+    NEW_ARGUMENT=""
+    for ((t = 0 ; t < ${#T[@]} ; t++)) ;do
+      vprint 4 "          old[${t}] |${T[t]}|"
+
+      # if target line# doesn't exist, create a new line# and flag the event
+      [[ "${T[t]}" && ! "${NEW_LNUM[${T[t]}]}" ]] && {
+        HIGHEST_NEW_LNUM=$((HIGHEST_NEW_LNUM+STEP))
+        NEW_LNUM[${T[t]}]=${HIGHEST_NEW_LNUM}
+        [[ "${FLAG}" ]] && FLAG+=","
+        FLAG+=" ${HIGHEST_NEW_LNUM} was ${T[t]}"
+        eprint "${OLD_LNUM[rn]} > ${CURRENT_NEW_LNUM}: Old line# ${T[t]} does not exist -> New line# ${HIGHEST_NEW_LNUM} also does not exist."
+      }
+
+      vprint 4 "          new[${t}] |${T[t]:+${NEW_LNUM[${T[t]}]}}|"
+      NEW_ARGUMENT+="${T[t]:+${NEW_LNUM[${T[t]}]}}"
+      ((t < ${#T[@]}-1)) && NEW_ARGUMENT+=","
+
+    done
+
+    vprint 3 "        new argument |${NEW_ARGUMENT}|"
+
+    NEW_STATEMENT="${KEYWORD}${NEW_ARGUMENT}"
+    vprint 2 "    new statement |${NEW_STATEMENT}|"
+
+    NEW_BODY+="${NEW_STATEMENT}"
+    vprint 5 ">   new body  |${NEW_BODY}|"
+
+    # advance the scan position to the end of the current statement
+    SCAN_POS=$((SCAN_POS+STATEMENT_POS+${#OLD_STATEMENT}))
+
+  done
+
+  # complete new line
+  vprint 0 "${CURRENT_NEW_LNUM}${NEW_BODY}"
+
+  # if a flag was raised while generating the new line, and if STEP leaves room,
+  # then write the message in a comment in the next line
+  [[ "${FLAG}" && ${STEP} -gt 1 ]] && vprint 0 "$((CURRENT_NEW_LNUM+1))'${CURRENT_NEW_LNUM}:${FLAG}"
+
+  vprint 1 ""
+
+done
