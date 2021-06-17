@@ -1,6 +1,6 @@
 #!/bin/bash
 # Renumber TRS-80 Model 100 BASIC code.
-# GPL3 b.kenyn.w@gmail.com
+# GPL3 b.kenyon.w@gmail.com
 #
 # Usage:
 # [DEBUG=#] [STEP=#] [START=#] ./renum.sh FILE.DO
