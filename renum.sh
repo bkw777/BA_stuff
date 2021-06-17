@@ -81,14 +81,14 @@ for ((rn = 1 ; rn <= NR ; rn++)) ; do
     # found a statement
 
     OLD_STATEMENT="${BASH_REMATCH[0]}"
-    pre="${REMAINING_OLD_BODY%%${OLD_STATEMENT}*}"
-    STATEMENT_POS=${#pre}
+    BEFORE_STATEMENT="${REMAINING_OLD_BODY%%${OLD_STATEMENT}*}"
+    STATEMENT_POS=${#BEFORE_STATEMENT}
+    STATEMENT_LEN=${#OLD_STATEMENT}
 
     # append part before statement to new body
-    NEW_BODY+="${pre}"
+    NEW_BODY+="${BEFORE_STATEMENT}"
     vprint 5 ">   new body  |${NEW_BODY}|"
 
-    # isolate the statement
     OLD_STATEMENT="${OLD_STATEMENT// /}"
     vprint 2 "    old statement |${OLD_STATEMENT}|"
 
@@ -106,19 +106,20 @@ for ((rn = 1 ; rn <= NR ; rn++)) ; do
     # replace each old target with new target
     NEW_ARGUMENT=""
     for ((t = 0 ; t < ${#T[@]} ; t++)) ;do
-      vprint 4 "          old[${t}] |${T[t]}|"
+      OLD_TARGET_LNUM="${T[t]}"
+      vprint 4 "          old[${t}] |${OLD_TARGET_LNUM}|"
 
       # if target line# doesn't exist, create a new line# and flag the event
-      [[ "${T[t]}" && ! "${NEW_LNUM[${T[t]}]}" ]] && {
-        HIGHEST_NEW_LNUM=$((HIGHEST_NEW_LNUM+STEP))
-        NEW_LNUM[${T[t]}]=${HIGHEST_NEW_LNUM}
+      [[ "${OLD_TARGET_LNUM}" && ! "${NEW_LNUM[OLD_TARGET_LNUM]}" ]] && {
+        HIGHEST_NEW_LNUM=$((HIGHEST_NEW_LNUM + STEP))
+        NEW_LNUM[OLD_TARGET_LNUM]=${HIGHEST_NEW_LNUM}
         [[ "${FLAG}" ]] && FLAG+=","
-        FLAG+=" ${HIGHEST_NEW_LNUM} was ${T[t]}"
-        eprint "${OLD_LNUM[rn]} > ${CURRENT_NEW_LNUM}: Old line# ${T[t]} does not exist -> New line# ${HIGHEST_NEW_LNUM} also does not exist."
+        FLAG+=" ${HIGHEST_NEW_LNUM} was ${OLD_TARGET_LNUM}"
+        eprint ">>> ${OLD_LNUM[rn]}->${CURRENT_NEW_LNUM}: Old line# ${OLD_TARGET_LNUM} does not exist -> New line# ${HIGHEST_NEW_LNUM} also does not exist."
       }
 
-      vprint 4 "          new[${t}] |${T[t]:+${NEW_LNUM[${T[t]}]}}|"
-      NEW_ARGUMENT+="${T[t]:+${NEW_LNUM[${T[t]}]}}"
+      vprint 4 "          new[${t}] |${OLD_TARGET_LNUM:+${NEW_LNUM[OLD_TARGET_LNUM]}}|"
+      NEW_ARGUMENT+="${OLD_TARGET_LNUM:+${NEW_LNUM[OLD_TARGET_LNUM]}}"
       ((t < ${#T[@]}-1)) && NEW_ARGUMENT+=","
 
     done
@@ -132,7 +133,8 @@ for ((rn = 1 ; rn <= NR ; rn++)) ; do
     vprint 5 ">   new body  |${NEW_BODY}|"
 
     # advance the scan position to the end of the current statement
-    SCAN_POS=$((SCAN_POS+STATEMENT_POS+${#OLD_STATEMENT}))
+    #SCAN_POS=$((SCAN_POS+STATEMENT_POS+${#OLD_STATEMENT}))
+    SCAN_POS=$((SCAN_POS + STATEMENT_POS + STATEMENT_LEN))
 
   done
 

@@ -110,19 +110,20 @@ END {
         # replace each old target with new target
         NEW_ARGUMENT = ""
         for (t = 1 ; t <= Tn ; t++) {
-          vprint(4,"          old[" t "] |" T[t] "|")
+          OLD_TARGET_LNUM = T[t]
+          vprint(4,"          old[" t "] |" OLD_TARGET_LNUM "|")
 
           # if target line# doesn't exist, create a new line# and flag the event
-          if (T[t] != "" && NEW_LNUM[T[t]] == "") {
+          if (OLD_TARGET_LNUM != "" && NEW_LNUM[OLD_TARGET_LNUM] == "") {
             HIGHEST_NEW_LNUM = HIGHEST_NEW_LNUM + STEP
-            NEW_LNUM[T[t]] = HIGHEST_NEW_LNUM
+            NEW_LNUM[OLD_TARGET_LNUM] = HIGHEST_NEW_LNUM
             if (FLAG) FLAG = FLAG ","
-            FLAG = FLAG " " HIGHEST_NEW_LNUM " was " T[t]
-            eprint(OLD_LNUM[rn] ">" CURRENT_NEW_LNUM ": Old line# " T[t] " does not exist -> New line# " HIGHEST_NEW_LNUM " also does not exist.")
+            FLAG = FLAG " " HIGHEST_NEW_LNUM " was " OLD_TARGET_LNUM
+            eprint(">>> " OLD_LNUM[rn] "->" CURRENT_NEW_LNUM ": Old line# " OLD_TARGET_LNUM " does not exist -> New line# " HIGHEST_NEW_LNUM " also does not exist.")
           }
 
-          vprint(4,"          new[" t "] |" NEW_LNUM[T[t]] "|")
-          NEW_ARGUMENT = NEW_ARGUMENT NEW_LNUM[T[t]]
+          vprint(4,"          new[" t "] |" NEW_LNUM[OLD_TARGET_LNUM] "|")
+          NEW_ARGUMENT = NEW_ARGUMENT NEW_LNUM[OLD_TARGET_LNUM]
           if (t < Tn) NEW_ARGUMENT = NEW_ARGUMENT ","
         }
         vprint(3,"        new argument |" NEW_ARGUMENT "|")
