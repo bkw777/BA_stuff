@@ -29,10 +29,10 @@ ARGUMENT_REGEX="[0-9,[:space:]]+"
 ifs="${IFS}"
 
 function vprint () {
-	local d=${1} ;shift
-	local s="${@}"
-	((DEBUG)) || s+=$'\r'
-	((DEBUG>=d)) && printf "%s\n" "${s}"
+  local d=${1} ;shift
+  local s="${@}"
+  ((DEBUG)) || s+=$'\r'
+  ((DEBUG>=d)) && printf "%s\n" "${s}"
 }
 
 function eprint () {
@@ -41,10 +41,10 @@ function eprint () {
 
 rn=0
 while IFS=$'\r\n' read -r t ; do
-	[[ "${t}" =~ ^[0-9]+ ]] || continue
-	OLD_LNUM[++rn]=${BASH_REMATCH[0]}
-	OLD_BODY[rn]="${t:${#OLD_LNUM[rn]}}"
-	NEW_LNUM[${OLD_LNUM[rn]}]=$((START+(rn-1)*STEP))
+  [[ "${t}" =~ ^[0-9]+ ]] || continue
+  OLD_LNUM[++rn]=${BASH_REMATCH[0]}
+  OLD_BODY[rn]="${t:${#OLD_LNUM[rn]}}"
+  NEW_LNUM[${OLD_LNUM[rn]}]=$((START+(rn-1)*STEP))
 done
 
 NR=${rn}
