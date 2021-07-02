@@ -3,7 +3,7 @@
 # GPL3 b.kenyon.w@gmail.com
 #
 # Usage:
-# [DEBUG=#] [STEP=#] [START=#] ./renum.sh FILE.DO
+# [DEBUG=#] [STEP=#] [START=#] [SPACE=true|false] ./renum.sh FILE.DO
 #
 #   DEBUG=#  0 (default) = runnable output, with CRLF
 #            1+ = increasingly verbose debugging output, no CRLF
@@ -11,6 +11,8 @@
 #   STEP=#   new line numbers increment, default 10
 #
 #   START=#  new line numbers start, default 1*STEP
+#
+#   SPACE=true/false  insert space between keyword & argument
 #
 #   FILE.DO  ascii format TRS-80 Model 100 BASIC program
 #
@@ -24,6 +26,7 @@
 : ${DEBUG:=0}
 : ${STEP:=10}
 : ${START:=${STEP}}
+sp='' ;${SPACE:=false} && sp=' '
 KEYWORDS_REGEX="(GOTO|GOSUB|RESUME|ELSE|THEN)"
 ARGUMENT_REGEX="[0-9,[:space:]]+"
 ifs="${IFS}"
@@ -32,13 +35,14 @@ function vprint () {
   local d=${1} ;shift
   local s="${@}"
   ((DEBUG)) || s+=$'\r'
-  ((DEBUG>=d)) && printf "%s\n" "${s}"
+  ((DEBUG>=d)) && printf "%s\n" "${s}" || :
 }
 
 function eprint () {
   ((DEBUG)) && printf "%s\n" "${@}" || printf "%s\n" "${@}" >&2
 }
 
+# read all input lines into memory
 rn=0
 while IFS=$'\r\n' read -r t ; do
   [[ "${t}" =~ ^[0-9]+ ]] || continue
@@ -126,7 +130,7 @@ for ((rn = 1 ; rn <= NR ; rn++)) ; do
 
     vprint 3 "        new argument |${NEW_ARGUMENT}|"
 
-    NEW_STATEMENT="${KEYWORD}${NEW_ARGUMENT}"
+    NEW_STATEMENT="${KEYWORD}${sp}${NEW_ARGUMENT}${sp}"
     vprint 2 "    new statement |${NEW_STATEMENT}|"
 
     NEW_BODY+="${NEW_STATEMENT}"
