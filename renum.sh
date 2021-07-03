@@ -3,7 +3,7 @@
 # GPL3 b.kenyon.w@gmail.com
 #
 # Usage:
-# [DEBUG=#] [STEP=#] [START=#] [SPACE=true|false] ./renum.sh FILE.DO
+# [DEBUG=#] [STEP=#] [START=#] [SPACE=true|false] ./renum.sh <FILE.DO >NEW.DO
 #
 #   DEBUG=#  0 (default) = runnable output, with CRLF
 #            1+ = increasingly verbose debugging output, no CRLF
@@ -12,16 +12,16 @@
 #
 #   START=#  new line numbers start, default 1*STEP
 #
-#   SPACE=true/false  insert space between keyword & argument
+#   SPACE=true|false  insert space between keyword & argument
 #
 #   FILE.DO  ascii format TRS-80 Model 100 BASIC program
 #
 # Examples:
 # runnable output, default settings
-#    ./renum.sh FILE.DO > NEW.DO
+#    ./renum.sh <OLD.DO >NEW.DO
 #
 # max verbose debug, start output line#'s at 5000, increment by 1
-#    DEBUG=5 START=5000 STEP=1 ./renum.sh  FILE.DO |less
+#    DEBUG=5 START=5000 STEP=1 ./renum.sh <FILE.DO |less
 
 : ${DEBUG:=0}
 : ${STEP:=10}
@@ -42,17 +42,30 @@ function eprint () {
   ((DEBUG)) && printf "%s\n" "${@}" || printf "%s\n" "${@}" >&2
 }
 
+function usage() {
+  while read -r x t ;do
+    case "${x}" in
+      '#') printf "%s\n" "${t}" >&2 ;;
+      '') exit ;;
+    esac
+  done < ${0}
+}
+
+case "${1}" in
+  -?|-h|--help|help) usage ;;
+esac
+
 # read all input lines into memory
 rn=0
 while IFS=$'\r\n' read -r t ; do
-  [[ "${t}" =~ ^[0-9]+ ]] || continue
-  OLD_LNUM[++rn]=${BASH_REMATCH[0]}
+  [[ "${t}" =~ ^[[:space:]]*[0-9]+ ]] || continue
+  OLD_LNUM[++rn]=${BASH_REMATCH[0]// /}
   OLD_BODY[rn]="${t:${#OLD_LNUM[rn]}}"
   NEW_LNUM[${OLD_LNUM[rn]}]=$((START+(rn-1)*STEP))
 done
 
 NR=${rn}
-HIGHEST_NEW_LNUM=NEW_LNUM[OLD_LNUM[NR]]
+HIGHEST_NEW_LNUM=${NEW_LNUM[${OLD_LNUM[NR]}]}
 
 # loop over every record in OLD_BODY[]
 for ((rn = 1 ; rn <= NR ; rn++)) ; do
@@ -63,7 +76,6 @@ for ((rn = 1 ; rn <= NR ; rn++)) ; do
   SCAN_POS=1
   OLD_BODY_LEN=${#OLD_BODY[rn]}
   FLAG=""
-  CURRENT_NEW_LNUM=${NEW_LNUM[${OLD_LNUM[rn]}]}
 
   # process a line
   while ((SCAN_POS < OLD_BODY_LEN)) ; do
@@ -119,7 +131,7 @@ for ((rn = 1 ; rn <= NR ; rn++)) ; do
         NEW_LNUM[OLD_TARGET_LNUM]=${HIGHEST_NEW_LNUM}
         [[ "${FLAG}" ]] && FLAG+=","
         FLAG+=" ${HIGHEST_NEW_LNUM} was ${OLD_TARGET_LNUM}"
-        eprint ">>> ${OLD_LNUM[rn]}->${CURRENT_NEW_LNUM}: Old line# ${OLD_TARGET_LNUM} does not exist -> New line# ${HIGHEST_NEW_LNUM} also does not exist."
+        eprint ">>> ${OLD_LNUM[rn]}->${NEW_LNUM[${OLD_LNUM[rn]}]}: Old line# ${OLD_TARGET_LNUM} does not exist -> New line# ${HIGHEST_NEW_LNUM} also does not exist."
       }
 
       vprint 4 "          new[${t}] |${OLD_TARGET_LNUM:+${NEW_LNUM[OLD_TARGET_LNUM]}}|"
@@ -142,11 +154,11 @@ for ((rn = 1 ; rn <= NR ; rn++)) ; do
   done
 
   # complete new line
-  vprint 0 "${CURRENT_NEW_LNUM}${NEW_BODY}"
+  vprint 0 "${NEW_LNUM[${OLD_LNUM[rn]}]}${NEW_BODY}"
 
   # if a flag was raised while generating the new line, and if STEP leaves room,
   # then write the message in a comment in the next line
-  [[ "${FLAG}" && ${STEP} -gt 1 ]] && vprint 0 "$((CURRENT_NEW_LNUM+1))'${CURRENT_NEW_LNUM}:${FLAG}"
+  [[ "${FLAG}" && ${STEP} -gt 1 ]] && vprint 0 "$((NEW_LNUM[${OLD_LNUM[rn]}]+1))'${NEW_LNUM[${OLD_LNUM[rn]}]}:${FLAG}"
 
   vprint 1 ""
 
