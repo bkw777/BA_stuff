@@ -1,8 +1,22 @@
 #!/bin/bash
-# Remove all tabs, spaces, and comments from BASIC code
+# Remove whitespace and comments from TRS-80 Model 100 BASIC code
 # The first line is preseved for copyright & credits
-# usage: ./packer.sh <BIG.DO >SMALL.DO
-# Brian K. White 20210703
+# usage: bapack <BIG.DO >SMALL.DO
+# Brian K. White b.kenyon.w@gmail.com 20210703
+
+function usage() {
+  while read -r x t ;do
+    case "${x}" in
+      '#') printf "%s\n" "${t}" >&2 ;;
+      '') exit ;;
+    esac
+  done < ${0}
+}
+
+case "${1}" in
+  -?|-h|--help|help) usage ;;
+esac
+
 n=0
 while IFS=$'\r\n' read -r t ;do
   o='' p=-1

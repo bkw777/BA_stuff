@@ -1,9 +1,9 @@
 #!/bin/bash
-# Renumber TRS-80 Model 100 BASIC code.
-# GPL3 b.kenyon.w@gmail.com
+# Renumber TRS-80 Model 100 BASIC code
+# Brian K. White b.kenyon.w@gmail.com 20210703
 #
 # Usage:
-# [DEBUG=#] [STEP=#] [START=#] [SPACE=true|false] ./renum.sh <FILE.DO >NEW.DO
+# [DEBUG=#] [STEP=#] [START=#] [SPACE=true|false] barenum <FILE.DO >NEW.DO
 #
 #   DEBUG=#  0 (default) = runnable output, with CRLF
 #            1+ = increasingly verbose debugging output, no CRLF
@@ -18,10 +18,12 @@
 #
 # Examples:
 # runnable output, default settings
-#    ./renum.sh <OLD.DO >NEW.DO
+#    barenum <OLD.DO >NEW.DO
 #
-# max verbose debug, start output line#'s at 5000, increment by 1
-#    DEBUG=5 START=5000 STEP=1 ./renum.sh <FILE.DO |less
+# debug output, start output line#'s at 5000, increment by 1
+#    DEBUG=5 START=5000 STEP=1 barenum <FILE.DO |less
+
+#
 
 : ${DEBUG:=0}
 : ${STEP:=10}
