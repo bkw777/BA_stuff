@@ -6,14 +6,14 @@ Process ascii format BASIC code for TRS-80 Model 100 and similar machines.
 
 Written in pure bash, using only built-in features, no external tools like grep, cut, sed, bc, etc... not even backticks or $(...) child bash processes.
 
-
+<!-- hide until it's ready
 See [TPDD_sector](https://github.com/bkw777/TPDD_sector) (Makefile) for example use-case.
 
 The "source" version of that program is sector.bas, and has far too many comments and spaces to waste that much space on a Model T.  
 But the Makefile generates SECTOR.DO which is packed as small as possible, and that is what you actually run on the Model T.
 
 As you work, moving lines around and using up the available line numbers between existing lines, you periodically run "make renum", and that renumbers the file in-place any time you want.
-
+-->
 ## barenum
 
 Renumber a BASIC program.
