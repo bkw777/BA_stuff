@@ -23,6 +23,7 @@ while IFS=$'\r\n' read -r t ;do
   while (( ${p} < ${#t} )) ;do
     c="${t:$((++p)):1}"
     [[ "${t:${p}:3}" == [Rr][Ee][Mm] ]] && c="'"
+    [[ "${t:${p}:5}" == [Pp][Rr][Ii][Nn][Tt] ]] && c="?" p=$((p+4))
     case "${c}" in
       $'\t'|' ') continue ;;
       "'") p=${#t} ; continue ;;

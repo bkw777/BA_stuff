@@ -51,7 +51,7 @@ So you can just edit .DO files conveniently in any editor and ignore the mixed l
 
 Pack a BASIC program.
 
-Remove all tabs, spaces, and comments to produce a runnable version that consumes less ram.
+Remove all tabs, spaces, and comments, remove line#s that had only a comment, replace all PRINT with ?, to produce a runnable version that consumes less ram.
 
 The first line is preserved without stripping so that the packed output can still include copyright & credits.
 
@@ -61,3 +61,5 @@ and have a Makefile generate a "packed" version that you actually use to run on 
 Takes no options. Input & output are via stdin & stdout.
 
 ```bapack <BIG.DO >SMALL.DO```
+
+The PRINT -> ? conversion doesn't save any ram on the receiving machine because the tokenized version is the same either way, and the interpreter will still display PRINT and write PRINT when saving the file in ascii format, but it does still save some serial transmission speed. It makes bootstrap loader files as small and fast to load as possible.
