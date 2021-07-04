@@ -61,4 +61,4 @@ Takes no options. Input & output are via stdin & stdout.
 
 ```bapack <BIG.DO >SMALL.DO```
 
-The PRINT -> ? conversion doesn't save any ram on the receiving machine because the tokenized version is the same either way, and the interpreter will still display PRINT and write PRINT when saving the file in ascii format, but it does still save some serial transmission speed. It makes bootstrap loader files as small and fast to load as possible.
+The PRINT -> ? conversion doesn't save any ram on the receiving machine because the tokenized version is the same either way, and the interpreter will still display PRINT and write PRINT when saving the file in ascii format, but it does still save some serial transmission speed. It makes bootstrap loader files a little bit smaller and faster to load.
