@@ -44,7 +44,7 @@ debug output, start output line#'s at 5000, increment by 1
 Also serves as a line-ending cleaner. Input file may have dos/unix/mixed line-endings,  
 output will be all CRLF for the default output, all LF for the debug output.
 
-So you can just edit .DO files conveniently in any editor and ignore the mixed line-endings, and the barenum output will be clean.
+So you can just edit .DO files conveniently in any editor and ignore the mixed line-endings you create along the way, and barenum will always clean it up.
 
 ## bapack
 
