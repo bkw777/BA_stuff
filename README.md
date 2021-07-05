@@ -8,8 +8,8 @@ Written in pure bash, using only built-in features, no external tools like grep,
 
 See [TPDD_stuff](https://github.com/bkw777/TPDD_stuff) (Makefile) for example use-case.
 
-The "source" version of that program is sector.bas, and has far too many comments and spaces to waste that much space on a Model T.  
-But the Makefile generates SECTOR.DO which is packed as small as possible, and that is what you actually run on the Model T.
+The "source" version of that program is TPDD2_sector.bas, and has far too many comments and spaces to waste that much space on a Model T.  
+But the Makefile generates SECTR2.DO which is packed as small as possible, and that is what you actually run on the Model T.
 
 As you work, moving lines around and using up the available line numbers between existing lines, you periodically run "make renum", and that renumbers the file in-place any time you want.
 
