@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Remove whitespace and comments from TRS-80 Model 100 BASIC code
 # The first line is preseved for copyright & credits
 # usage: bapack <BIG.DO >SMALL.DO
@@ -18,7 +18,7 @@ case "${1}" in
 esac
 
 n=0
-while IFS=$'\r\n' read -r t ;do
+while IFS=$'\r\n' read -d$'\r\n' -r t ;do
   o='' p=-1
   while (( ${p} < ${#t} )) ;do
     c="${t:$((++p)):1}"

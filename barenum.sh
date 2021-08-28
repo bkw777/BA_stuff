@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Renumber TRS-80 Model 100 BASIC code
 # Brian K. White b.kenyon.w@gmail.com 20210703
 #
@@ -22,8 +22,6 @@
 #
 # debug output, start output line#'s at 5000, increment by 1
 #    DEBUG=5 START=5000 STEP=1 barenum <FILE.DO |less
-
-#
 
 : ${DEBUG:=0}
 : ${STEP:=10}
@@ -59,7 +57,7 @@ esac
 
 # read all input lines into memory
 rn=0
-while IFS=$'\r\n' read -r t ; do
+while IFS=$'\r\n' read -d$'\r\n' -r t ; do
   [[ "${t}" =~ ^[[:space:]]*[0-9]+ ]] || continue
   OLD_LNUM[++rn]=${BASH_REMATCH[0]// /}
   OLD_BODY[rn]="${t:${#OLD_LNUM[rn]}}"
