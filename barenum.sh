@@ -28,6 +28,8 @@ LANG=C
 : ${STEP:=10}
 : ${START:=${STEP}}
 sp= ;${SPACE:=false} && sp=' '
+# TODO FIXME more complete regex from hackerb9@gmail.com
+# (GO\s*TO|GOSUB|THEN|ELSE|RESTORE|RESUME|RETURN|RUN)
 KEYWORDS_REGEX="(GOTO|GOSUB|RESUME|ELSE|THEN)"
 ARGUMENT_REGEX="[0-9,[:space:]]+"
 ifs=${IFS}
