@@ -28,7 +28,7 @@ LANG=C
 : ${STEP:=10}
 : ${START:=${STEP}}
 sp= ;${SPACE:=false} && sp=' '
-KEYWORDS_REGEX="(GOTO|GOSUB|RESUME|ELSE|THEN)"
+KEYWORDS_REGEX="(GOTO|GOSUB|RESUME|ELSE|THEN|RESTORE|RUN)"
 ARGUMENT_REGEX="[0-9,[:space:]]+"
 ifs=${IFS}
 
@@ -57,7 +57,7 @@ esac
 
 # read all input lines into memory
 rn=0
-while IFS=$'\r\n' read -r t ; do
+while IFS=$'\r\n' read -r t ;do
   [[ "${t}" =~ ^[[:space:]]*[0-9]+ ]] || continue
   OLD_LNUM[++rn]=${BASH_REMATCH[0]//[[:space:]]/}
   OLD_BODY[rn]=${t:${#OLD_LNUM[rn]}}
@@ -78,7 +78,7 @@ for ((rn=1;rn<=NR;rn++)) ;do
   FLAG=
 
   # process a line
-  while ((SCAN_POS<OLD_BODY_LEN)) ; do
+  while ((SCAN_POS<OLD_BODY_LEN)) ;do
 
     REMAINING_OLD_BODY=${OLD_BODY[rn]:$((SCAN_POS-1))}
     vprint 3 "    position: ${SCAN_POS}"
@@ -129,14 +129,14 @@ for ((rn=1;rn<=NR;rn++)) ;do
       [[ "${OLD_TARGET_LNUM}" && ! "${NEW_LNUM[OLD_TARGET_LNUM]}" ]] && {
         HIGHEST_NEW_LNUM=$((HIGHEST_NEW_LNUM+STEP))
         NEW_LNUM[OLD_TARGET_LNUM]=${HIGHEST_NEW_LNUM}
-        [[ "${FLAG}" ]] && FLAG+=','
+        [[ "${FLAG}" ]] && FLAG+=,
         FLAG+=" ${HIGHEST_NEW_LNUM} was ${OLD_TARGET_LNUM}"
         eprint ">>> ${OLD_LNUM[rn]}->${NEW_LNUM[${OLD_LNUM[rn]}]}: Old line# ${OLD_TARGET_LNUM} does not exist -> New line# ${HIGHEST_NEW_LNUM} also does not exist."
       }
 
       vprint 4 "          new[${t}] |${OLD_TARGET_LNUM:+${NEW_LNUM[OLD_TARGET_LNUM]}}|"
       NEW_ARGUMENT+="${OLD_TARGET_LNUM:+${NEW_LNUM[OLD_TARGET_LNUM]}}"
-      ((t<${#T[@]}-1)) && NEW_ARGUMENT+=','
+      ((t<${#T[@]}-1)) && NEW_ARGUMENT+=,
 
     done
 
